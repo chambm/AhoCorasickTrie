@@ -1,12 +1,10 @@
 Package: AhoCorasickTrie
 Type: Package
 Title: Fast Searching for Multiple Keywords in Multiple Texts
-Version: 0.0.0.9000
-Authors@R: as.person(c(
-      "Matt Chambers <matt.chambers42@gmail.com> [aut, cre]",
-      "Tomas Petricek [aut, cph]",
-      "Vanderbilt University [cph]"
-    ))
+Version: 0.1.0
+Authors@R: c(person("Matt", "Chambers", email="matt.chambers42@gmail.com", role=c("aut", "cre")),
+    person("Tomas", "Petricek", role=c("aut", "cph")),
+    person("Vanderbilt University", role="cph"))
 Description: Aho-Corasick is an optimal algorithm for finding many
     keywords in a text. It can locate all matches in a text in O(N+M) time; i.e.,
     the time needed scales linearly with the number of keywords (N) and the size of
