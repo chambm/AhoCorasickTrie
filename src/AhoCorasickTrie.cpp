@@ -100,6 +100,8 @@ class AhoCorasickTrie
     friend class AhoCorasickTrie;
   };
 
+  virtual ~AhoCorasickTrie() {};
+
   /// inserts a single shared_string and rebuilds the trie
   virtual void insert(const shared_keytype& keyword) = 0;
 
