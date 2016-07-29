@@ -6,8 +6,8 @@
 using namespace Rcpp;
 
 // AhoCorasickSearchList
-Rcpp::List AhoCorasickSearchList(Rcpp::StringVector keywords, Rcpp::List textList, std::string alphabet, bool groupByKeyword);
-RcppExport SEXP AhoCorasickTrie_AhoCorasickSearchList(SEXP keywordsSEXP, SEXP textListSEXP, SEXP alphabetSEXP, SEXP groupByKeywordSEXP) {
+Rcpp::List AhoCorasickSearchList(Rcpp::StringVector keywords, Rcpp::List textList, std::string alphabet, bool groupByKeyword, int iterationFeedback);
+RcppExport SEXP AhoCorasickTrie_AhoCorasickSearchList(SEXP keywordsSEXP, SEXP textListSEXP, SEXP alphabetSEXP, SEXP groupByKeywordSEXP, SEXP iterationFeedbackSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -15,13 +15,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::List >::type textList(textListSEXP);
     Rcpp::traits::input_parameter< std::string >::type alphabet(alphabetSEXP);
     Rcpp::traits::input_parameter< bool >::type groupByKeyword(groupByKeywordSEXP);
-    __result = Rcpp::wrap(AhoCorasickSearchList(keywords, textList, alphabet, groupByKeyword));
+    Rcpp::traits::input_parameter< int >::type iterationFeedback(iterationFeedbackSEXP);
+    __result = Rcpp::wrap(AhoCorasickSearchList(keywords, textList, alphabet, groupByKeyword, iterationFeedback));
     return __result;
 END_RCPP
 }
 // AhoCorasickSearch
-Rcpp::List AhoCorasickSearch(Rcpp::StringVector keywords, Rcpp::StringVector text, std::string alphabet, bool groupByKeyword);
-RcppExport SEXP AhoCorasickTrie_AhoCorasickSearch(SEXP keywordsSEXP, SEXP textSEXP, SEXP alphabetSEXP, SEXP groupByKeywordSEXP) {
+Rcpp::List AhoCorasickSearch(Rcpp::StringVector keywords, Rcpp::StringVector text, std::string alphabet, bool groupByKeyword, int iterationFeedback);
+RcppExport SEXP AhoCorasickTrie_AhoCorasickSearch(SEXP keywordsSEXP, SEXP textSEXP, SEXP alphabetSEXP, SEXP groupByKeywordSEXP, SEXP iterationFeedbackSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -29,7 +30,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::StringVector >::type text(textSEXP);
     Rcpp::traits::input_parameter< std::string >::type alphabet(alphabetSEXP);
     Rcpp::traits::input_parameter< bool >::type groupByKeyword(groupByKeywordSEXP);
-    __result = Rcpp::wrap(AhoCorasickSearch(keywords, text, alphabet, groupByKeyword));
+    Rcpp::traits::input_parameter< int >::type iterationFeedback(iterationFeedbackSEXP);
+    __result = Rcpp::wrap(AhoCorasickSearch(keywords, text, alphabet, groupByKeyword, iterationFeedback));
     return __result;
 END_RCPP
 }

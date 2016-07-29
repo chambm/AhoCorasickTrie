@@ -437,6 +437,7 @@ std::unique_ptr<AhoCorasickTrie> CreateAhoCorasickTrie(FwdIterator begin, FwdIte
 //' @param textList List of lists, each sublist with one or more texts to search
 //' @param alphabet Alphabet to use; one of \code{ascii}, \code{aminoacid}, or \code{nucleicacid}
 //' @param groupByKeyword If true, matches are grouped by keyword (instead of by text)
+//' @param iterationFeedback When set to a positive integer \code{i}, console output will indicate when searching every \code{i}th text
 //' @return List of lists of matches, grouped by either text or by keyword (each list of texts gets its own list of matches)
 //' @description Builds an Aho-Corasick trie from one or more keywords and uses it to search a list of
 //'   one or more texts. For a large number of keywords, Aho-Corasick is much faster
@@ -461,7 +462,7 @@ std::unique_ptr<AhoCorasickTrie> CreateAhoCorasickTrie(FwdIterator begin, FwdIte
 //' @seealso
 //' \itemize{
 //' \item \href{http://www.codeproject.com/Articles/12383/Aho-Corasick-string-matching-in-C}{Aho-Corasick string matching in C#} for the article this package is based on
-//' \item \code{\link[Biostrings]{matchPDict}} and \code{\link[Starr]{match_ac}} for more memory efficient, but DNA-only, implementations of the algorithm.
+//' \item \code{\link[Biostrings]{matchPDict}} and \code{\link[Starr]{match_ac}} for more memory efficient, but DNA-only, implementations of the algorithm
 //' }
 //' @examples
 //' listEquals = function(a, b) { is.null(unlist(a)) && is.null(unlist(b)) ||
@@ -502,7 +503,11 @@ std::unique_ptr<AhoCorasickTrie> CreateAhoCorasickTrie(FwdIterator begin, FwdIte
 //' stopifnot(listEquals(namedSearch$predicate2$phrase1[[3]], list(keyword="Word", offset=11)))
 //' @export
 // [[Rcpp::export]]
-Rcpp::List AhoCorasickSearchList(Rcpp::StringVector keywords, Rcpp::List textList, std::string alphabet = "ascii", bool groupByKeyword = false)
+Rcpp::List AhoCorasickSearchList(Rcpp::StringVector keywords,
+                                 Rcpp::List textList,
+                                 std::string alphabet = "ascii",
+                                 bool groupByKeyword = false,
+                                 int iterationFeedback = 0)
 {
   using freicore::AhoCorasickTrie;
   using freicore::CreateAhoCorasickTrie;
@@ -522,7 +527,7 @@ Rcpp::List AhoCorasickSearchList(Rcpp::StringVector keywords, Rcpp::List textLis
   Rcpp::List resultPerList;
   auto listNames = textList.names();
 
-  for (int i=0; i < textList.size(); ++i)
+  for (int i=0, textListSize=textList.size(); i < textListSize; ++i)
   {
     if (groupByKeyword)
     {
@@ -542,8 +547,19 @@ Rcpp::List AhoCorasickSearchList(Rcpp::StringVector keywords, Rcpp::List textLis
         textNames = texts.names();
       Rcpp::StringVector resultNames;
 
-      for (int k=0; k < texts.size(); ++k)
+      for (int k=0, textsSize=texts.size(); k < textsSize; ++k)
       {
+        if (iterationFeedback > 0 && (k==0 || k+1==textsSize || (k % iterationFeedback)==0))
+        {
+          if (textListSize > 1)
+            Rcpp::Rcout << "Searching TextList " << (i+1) << "/" << textListSize << ", Text " << (k+1) << "/" << textsSize << std::endl;
+          else
+            Rcpp::Rcout << "Searching Text " << (k+1) << "/" << textsSize << std::endl;
+          R_FlushConsole();
+          R_ProcessEvents();
+          R_CheckUserInterrupt();
+        }
+
         std::vector<AhoCorasickTrie::SearchResult> results = trie->find_all(std::string(texts(k)));
 
         if (results.empty())
@@ -585,8 +601,19 @@ Rcpp::List AhoCorasickSearchList(Rcpp::StringVector keywords, Rcpp::List textLis
         textNames = texts.names();
       Rcpp::StringVector resultNames;
 
-      for (int k=0; k < texts.size(); ++k)
+      for (int k=0, textsSize=texts.size(); k < textsSize; ++k)
       {
+        if (iterationFeedback > 0 && (k==0 || k+1==textsSize || ((k+1) % iterationFeedback)==0))
+        {
+          if (textListSize > 1)
+            Rcpp::Rcout << "Searching TextList " << (i+1) << "/" << textListSize << ", Text " << (k+1) << "/" << textsSize << std::endl;
+          else
+            Rcpp::Rcout << "Searching Text " << (k+1) << "/" << textsSize << std::endl;
+          R_FlushConsole();
+          R_ProcessEvents();
+          R_CheckUserInterrupt();
+        }
+
         std::vector<AhoCorasickTrie::SearchResult> results = trie->find_all(std::string(texts(k)));
 
         if (hasNames && results.empty())
@@ -637,7 +664,7 @@ Rcpp::List AhoCorasickSearchList(Rcpp::StringVector keywords, Rcpp::List textLis
 //' @seealso
 //' \itemize{
 //' \item \href{http://www.codeproject.com/Articles/12383/Aho-Corasick-string-matching-in-C}{Aho-Corasick string matching in C#} for the article this package is based on
-//' \item \code{\link[Biostrings]{matchPDict}} and \code{\link[Starr]{match_ac}} for more memory efficient, but DNA-only, implementations of the algorithm.
+//' \item \code{\link[Biostrings]{matchPDict}} and \code{\link[Starr]{match_ac}} for more memory efficient, but DNA-only, implementations of the algorithm
 //' }
 //' @examples
 //' listEquals = function(a, b) { is.null(unlist(a)) && is.null(unlist(b)) ||
@@ -681,9 +708,13 @@ Rcpp::List AhoCorasickSearchList(Rcpp::StringVector keywords, Rcpp::List textLis
 //' stopifnot(listEquals(peptideSearch$KEKE, list(29, 31, 33)))
 //' @export
 // [[Rcpp::export]]
-Rcpp::List AhoCorasickSearch(Rcpp::StringVector keywords, Rcpp::StringVector text, std::string alphabet = "ascii", bool groupByKeyword = false)
+Rcpp::List AhoCorasickSearch(Rcpp::StringVector keywords,
+                             Rcpp::StringVector text,
+                             std::string alphabet = "ascii",
+                             bool groupByKeyword = false,
+                             int iterationFeedback = 0)
 {
-  return AhoCorasickSearchList(keywords, Rcpp::List::create(text), alphabet, groupByKeyword)(0);
+  return AhoCorasickSearchList(keywords, Rcpp::List::create(text), alphabet, groupByKeyword, iterationFeedback)(0);
 }
 
 /*** R
@@ -802,6 +833,9 @@ if (suppressPackageStartupMessages(require(microbenchmark)))
                          AhoCorasickNucleicAcid = AhoCorasickSearch(bigProbes, bigDNA, alphabet="nucleicacid"),
                          times=3))
   }
+
+  biggerDNA = rep(bigDNA, times=2000)
+  foo=AhoCorasickSearch(bigProbes, biggerDNA, alphabet="nucleicacid", iterationFeedback=5000)
 }
 
 */

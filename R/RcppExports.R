@@ -7,6 +7,7 @@
 #' @param textList List of lists, each sublist with one or more texts to search
 #' @param alphabet Alphabet to use; one of \code{ascii}, \code{aminoacid}, or \code{nucleicacid}
 #' @param groupByKeyword If true, matches are grouped by keyword (instead of by text)
+#' @param iterationFeedback When set to a positive integer \code{i}, console output will indicate when searching every \code{i}th text
 #' @return List of lists of matches, grouped by either text or by keyword (each list of texts gets its own list of matches)
 #' @description Builds an Aho-Corasick trie from one or more keywords and uses it to search a list of
 #'   one or more texts. For a large number of keywords, Aho-Corasick is much faster
@@ -31,7 +32,7 @@
 #' @seealso
 #' \itemize{
 #' \item \href{http://www.codeproject.com/Articles/12383/Aho-Corasick-string-matching-in-C}{Aho-Corasick string matching in C#} for the article this package is based on
-#' \item \code{\link[Biostrings]{matchPDict}} and \code{\link[Starr]{match_ac}} for more memory efficient, but DNA-only, implementations of the algorithm.
+#' \item \code{\link[Biostrings]{matchPDict}} and \code{\link[Starr]{match_ac}} for more memory efficient, but DNA-only, implementations of the algorithm
 #' }
 #' @examples
 #' listEquals = function(a, b) { is.null(unlist(a)) && is.null(unlist(b)) ||
@@ -71,8 +72,8 @@
 #' stopifnot(listEquals(namedSearch$predicate2$phrase1[[2]], list(keyword="Magic", offset=5)))
 #' stopifnot(listEquals(namedSearch$predicate2$phrase1[[3]], list(keyword="Word", offset=11)))
 #' @export
-AhoCorasickSearchList <- function(keywords, textList, alphabet = "ascii", groupByKeyword = FALSE) {
-    .Call('AhoCorasickTrie_AhoCorasickSearchList', PACKAGE = 'AhoCorasickTrie', keywords, textList, alphabet, groupByKeyword)
+AhoCorasickSearchList <- function(keywords, textList, alphabet = "ascii", groupByKeyword = FALSE, iterationFeedback = 0L) {
+    .Call('AhoCorasickTrie_AhoCorasickSearchList', PACKAGE = 'AhoCorasickTrie', keywords, textList, alphabet, groupByKeyword, iterationFeedback)
 }
 
 #' Fast searching for one or more keywords in one or more texts
@@ -101,7 +102,7 @@ AhoCorasickSearchList <- function(keywords, textList, alphabet = "ascii", groupB
 #' @seealso
 #' \itemize{
 #' \item \href{http://www.codeproject.com/Articles/12383/Aho-Corasick-string-matching-in-C}{Aho-Corasick string matching in C#} for the article this package is based on
-#' \item \code{\link[Biostrings]{matchPDict}} and \code{\link[Starr]{match_ac}} for more memory efficient, but DNA-only, implementations of the algorithm.
+#' \item \code{\link[Biostrings]{matchPDict}} and \code{\link[Starr]{match_ac}} for more memory efficient, but DNA-only, implementations of the algorithm
 #' }
 #' @examples
 #' listEquals = function(a, b) { is.null(unlist(a)) && is.null(unlist(b)) ||
@@ -144,7 +145,7 @@ AhoCorasickSearchList <- function(keywords, textList, alphabet = "ascii", groupB
 #' stopifnot(listEquals(peptideSearch$SEQUENCE, list(47)))
 #' stopifnot(listEquals(peptideSearch$KEKE, list(29, 31, 33)))
 #' @export
-AhoCorasickSearch <- function(keywords, text, alphabet = "ascii", groupByKeyword = FALSE) {
-    .Call('AhoCorasickTrie_AhoCorasickSearch', PACKAGE = 'AhoCorasickTrie', keywords, text, alphabet, groupByKeyword)
+AhoCorasickSearch <- function(keywords, text, alphabet = "ascii", groupByKeyword = FALSE, iterationFeedback = 0L) {
+    .Call('AhoCorasickTrie_AhoCorasickSearch', PACKAGE = 'AhoCorasickTrie', keywords, text, alphabet, groupByKeyword, iterationFeedback)
 }
 
