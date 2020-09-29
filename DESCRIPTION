@@ -20,12 +20,13 @@ Description: Aho-Corasick is an optimal algorithm for finding many
     only 20. UTF-8 (Unicode) matching is not currently supported.
 License: Apache License 2.0
 URL: https://github.com/chambm/AhoCorasickTrie
-BugReports:  https://github.com/chambm/AhoCorasickTrie/issues
+BugReports: https://github.com/chambm/AhoCorasickTrie/issues
 Encoding: UTF-8
 LazyData: true
 Imports:
     Rcpp (>= 0.12.5)
 LinkingTo: Rcpp
-Suggests: Biostrings, microbenchmark
+Suggests: Biostrings, microbenchmark,
+    testthat
 SystemRequirements: C++11
-RoxygenNote: 5.0.1
+RoxygenNote: 7.1.1

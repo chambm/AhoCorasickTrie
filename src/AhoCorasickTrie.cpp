@@ -462,7 +462,7 @@ std::unique_ptr<AhoCorasickTrie> CreateAhoCorasickTrie(FwdIterator begin, FwdIte
 //' @seealso
 //' \itemize{
 //' \item \href{http://www.codeproject.com/Articles/12383/Aho-Corasick-string-matching-in-C}{Aho-Corasick string matching in C#} for the article this package is based on
-//' \item \code{\link[Biostrings]{matchPDict}} and \code{\link[Starr]{match_ac}} for more memory efficient, but DNA-only, implementations of the algorithm
+//' \item \code{\link[Biostrings]{matchPDict}} for a more memory efficient, but DNA-only, implementation of the algorithm
 //' }
 //' @examples
 //' listEquals = function(a, b) { is.null(unlist(a)) && is.null(unlist(b)) ||
@@ -549,7 +549,7 @@ Rcpp::List AhoCorasickSearchList(Rcpp::StringVector keywords,
 
       for (int k=0, textsSize=texts.size(); k < textsSize; ++k)
       {
-        if (iterationFeedback > 0 && (k==0 || k+1==textsSize || (k % iterationFeedback)==0))
+        if (iterationFeedback > 0 && (k==0 || k+1==textsSize || ((k+1) % iterationFeedback)==0))
         {
           if (textListSize > 1)
             Rcpp::Rcout << "Searching TextList " << (i+1) << "/" << textListSize << ", Text " << (k+1) << "/" << textsSize << std::endl;
@@ -664,7 +664,7 @@ Rcpp::List AhoCorasickSearchList(Rcpp::StringVector keywords,
 //' @seealso
 //' \itemize{
 //' \item \href{http://www.codeproject.com/Articles/12383/Aho-Corasick-string-matching-in-C}{Aho-Corasick string matching in C#} for the article this package is based on
-//' \item \code{\link[Biostrings]{matchPDict}} and \code{\link[Starr]{match_ac}} for more memory efficient, but DNA-only, implementations of the algorithm
+//' \item \code{\link[Biostrings]{matchPDict}} for a more memory efficient, but DNA-only, implementation of the algorithm
 //' }
 //' @examples
 //' listEquals = function(a, b) { is.null(unlist(a)) && is.null(unlist(b)) ||
@@ -835,7 +835,7 @@ if (suppressPackageStartupMessages(require(microbenchmark)))
   }
 
   biggerDNA = rep(bigDNA, times=2000)
-  foo=AhoCorasickSearch(bigProbes, biggerDNA, alphabet="nucleicacid", iterationFeedback=5000)
+  foo=AhoCorasickSearch(bigProbes, biggerDNA, alphabet="nucleicacid", groupByKeyword=T, iterationFeedback=5000)
 }
 
 */

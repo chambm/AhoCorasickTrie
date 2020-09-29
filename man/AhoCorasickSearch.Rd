@@ -4,8 +4,13 @@
 \alias{AhoCorasickSearch}
 \title{Fast searching for one or more keywords in one or more texts}
 \usage{
-AhoCorasickSearch(keywords, text, alphabet = "ascii",
-  groupByKeyword = FALSE, iterationFeedback = 0L)
+AhoCorasickSearch(
+  keywords,
+  text,
+  alphabet = "ascii",
+  groupByKeyword = FALSE,
+  iterationFeedback = 0L
+)
 }
 \arguments{
 \item{keywords}{Character vector of one or more keywords}
@@ -85,7 +90,6 @@ stopifnot(listEquals(peptideSearch$KEKE, list(29, 31, 33)))
 \seealso{
 \itemize{
 \item \href{http://www.codeproject.com/Articles/12383/Aho-Corasick-string-matching-in-C}{Aho-Corasick string matching in C#} for the article this package is based on
-\item \code{\link[Biostrings]{matchPDict}} and \code{\link[Starr]{match_ac}} for more memory efficient, but DNA-only, implementations of the algorithm
+\item \code{\link[Biostrings]{matchPDict}} for a more memory efficient, but DNA-only, implementation of the algorithm
 }
 }
-
