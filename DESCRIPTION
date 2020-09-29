@@ -1,7 +1,7 @@
 Package: AhoCorasickTrie
 Type: Package
 Title: Fast Searching for Multiple Keywords in Multiple Texts
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: c(person("Matt", "Chambers", email="matt.chambers42@gmail.com", role=c("aut", "cre")),
     person("Tomas", "Petricek", role=c("aut", "cph")),
     person("Vanderbilt University", role="cph"))
