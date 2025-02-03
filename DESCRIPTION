@@ -25,7 +25,6 @@ Encoding: UTF-8
 Imports:
     Rcpp (>= 0.12.5)
 LinkingTo: Rcpp
-Suggests: Biostrings, microbenchmark,
-    testthat
+Suggests: microbenchmark, testthat
 SystemRequirements: C++14
 RoxygenNote: 7.1.1
