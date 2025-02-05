@@ -89,6 +89,6 @@ stopifnot(listEquals(namedSearch$predicate2$phrase1[[3]], list(keyword="Word", o
 \seealso{
 \itemize{
 \item \href{https://www.codeproject.com/Articles/12383/Aho-Corasick-string-matching-in-C}{Aho-Corasick string matching in C#} for the article this package is based on
-\item \code{\link[Biostrings]{matchPDict}} for a more memory efficient, but DNA-only, implementation of the algorithm
+\item \code{Biostrings matchPDict} for a more memory efficient, but DNA-only, implementation of the algorithm
 }
 }

@@ -87,7 +87,7 @@ if (suppressPackageStartupMessages(require(microbenchmark)))
                        AhoCorasickGroupByKeyword = AhoCorasickSearch(bigPeptides, bigProteins, groupByKeyword=T),
                        times=3))
 
-  if (suppressPackageStartupMessages(require(Biostrings)))
+  if (0) #suppressPackageStartupMessages(require(Biostrings)))
   {
     set.seed(0)
     # generate some random DNA sequences
@@ -103,13 +103,13 @@ if (suppressPackageStartupMessages(require(microbenchmark)))
                                         })),
                   recursive=T)
 
-    dict = DNAStringSet(bigProbes)
-    dna = DNAString(paste(bigDNA, collapse="."))
-    pdict = PDict(dict)
-    print(microbenchmark(createDNAStringSet = DNAStringSet(bigProbes),
-                         createDNAString = DNAString(paste(bigDNA, collapse=".")),
-                         createPDict = PDict(dict),
-                         matchPDict = matchPDict(pdict, dna),
+    #dict = DNAStringSet(bigProbes)
+    #dna = DNAString(paste(bigDNA, collapse="."))
+    #pdict = PDict(dict)
+    print(microbenchmark(#createDNAStringSet = DNAStringSet(bigProbes),
+                         #createDNAString = DNAString(paste(bigDNA, collapse=".")),
+                         #createPDict = PDict(dict),
+                         #matchPDict = matchPDict(pdict, dna),
                          AhoCorasickASCII = AhoCorasickSearch(bigProbes, bigDNA),
                          AhoCorasickNucleicAcid = AhoCorasickSearch(bigProbes, bigDNA, alphabet="nucleicacid"),
                          times=3))
