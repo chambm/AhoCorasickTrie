@@ -283,7 +283,7 @@ private:
         for (int i = 0; i < SymbolTranslator::size(); ++i)
           if (transitionHash[i])
             delete transitionHash[i];
-          delete[] transitionHash;
+        delete[] transitionHash;
       }
     }
 
@@ -462,7 +462,7 @@ std::unique_ptr<AhoCorasickTrie> CreateAhoCorasickTrie(FwdIterator begin, FwdIte
 //' @seealso
 //' \itemize{
 //' \item \href{https://www.codeproject.com/Articles/12383/Aho-Corasick-string-matching-in-C}{Aho-Corasick string matching in C#} for the article this package is based on
-//' \item \code{\link[Biostrings]{matchPDict}} for a more memory efficient, but DNA-only, implementation of the algorithm
+//' \item \code{Biostrings matchPDict} for a more memory efficient, but DNA-only, implementation of the algorithm
 //' }
 //' @examples
 //' listEquals = function(a, b) { is.null(unlist(a)) && is.null(unlist(b)) ||
@@ -664,7 +664,7 @@ Rcpp::List AhoCorasickSearchList(Rcpp::StringVector keywords,
 //' @seealso
 //' \itemize{
 //' \item \href{https://www.codeproject.com/Articles/12383/Aho-Corasick-string-matching-in-C}{Aho-Corasick string matching in C#} for the article this package is based on
-//' \item \code{\link[Biostrings]{matchPDict}} for a more memory efficient, but DNA-only, implementation of the algorithm
+//' \item \code{Biostrings matchPDict} for a more memory efficient, but DNA-only, implementation of the algorithm
 //' }
 //' @examples
 //' listEquals = function(a, b) { is.null(unlist(a)) && is.null(unlist(b)) ||
@@ -806,33 +806,33 @@ if (suppressPackageStartupMessages(require(microbenchmark)))
                        AhoCorasickGroupByKeyword = AhoCorasickSearch(bigPeptides, bigProteins, groupByKeyword=T),
                        times=3))
 
-  if (suppressPackageStartupMessages(require(Biostrings)))
-  {
-    set.seed(0)
-    # generate some random DNA sequences
-    bigDNA = replicate(10, paste(sample(strsplit("AGTC", "")[[1]], 100, replace=T), collapse=""))
-
-    set.seed(0)
-    #generate random 10mers from the above DNA sequences
-    bigProbes = c(replicate(100, sapply(bigDNA,
-                                        function(dna)
-                                        {
-                                          site=sort(sample(seq(1, nchar(dna)-10, 10), 1, replace=F))
-                                          substr(dna, site, site+10)
-                                        })),
-                  recursive=T)
-
-    dict = DNAStringSet(bigProbes)
-    dna = DNAString(paste(bigDNA, collapse="."))
-    pdict = PDict(dict)
-    print(microbenchmark(createDNAStringSet = DNAStringSet(bigProbes),
-                         createDNAString = DNAString(paste(bigDNA, collapse=".")),
-                         createPDict = PDict(dict),
-                         matchPDict = matchPDict(pdict, dna),
-                         AhoCorasickASCII = AhoCorasickSearch(bigProbes, bigDNA),
-                         AhoCorasickNucleicAcid = AhoCorasickSearch(bigProbes, bigDNA, alphabet="nucleicacid"),
-                         times=3))
-  }
+  # if (suppressPackageStartupMessages(require(Biostrings)))
+  # {
+  #   set.seed(0)
+  #   # generate some random DNA sequences
+  #   bigDNA = replicate(10, paste(sample(strsplit("AGTC", "")[[1]], 100, replace=T), collapse=""))
+  #
+  #   set.seed(0)
+  #   #generate random 10mers from the above DNA sequences
+  #   bigProbes = c(replicate(100, sapply(bigDNA,
+  #                                       function(dna)
+  #                                       {
+  #                                         site=sort(sample(seq(1, nchar(dna)-10, 10), 1, replace=F))
+  #                                         substr(dna, site, site+10)
+  #                                       })),
+  #                 recursive=T)
+  #
+  #   dict = DNAStringSet(bigProbes)
+  #   dna = DNAString(paste(bigDNA, collapse="."))
+  #   pdict = PDict(dict)
+  #   print(microbenchmark(createDNAStringSet = DNAStringSet(bigProbes),
+  #                        createDNAString = DNAString(paste(bigDNA, collapse=".")),
+  #                        createPDict = PDict(dict),
+  #                        matchPDict = matchPDict(pdict, dna),
+  #                        AhoCorasickASCII = AhoCorasickSearch(bigProbes, bigDNA),
+  #                        AhoCorasickNucleicAcid = AhoCorasickSearch(bigProbes, bigDNA, alphabet="nucleicacid"),
+  #                        times=3))
+  # }
 
   biggerDNA = rep(bigDNA, times=2000)
   foo=AhoCorasickSearch(bigProbes, biggerDNA, alphabet="nucleicacid", groupByKeyword=T, iterationFeedback=5000)

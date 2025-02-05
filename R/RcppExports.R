@@ -32,7 +32,7 @@
 #' @seealso
 #' \itemize{
 #' \item \href{https://www.codeproject.com/Articles/12383/Aho-Corasick-string-matching-in-C}{Aho-Corasick string matching in C#} for the article this package is based on
-#' \item \code{\link[Biostrings]{matchPDict}} for a more memory efficient, but DNA-only, implementation of the algorithm
+#' \item \code{Biostrings matchPDict} for a more memory efficient, but DNA-only, implementation of the algorithm
 #' }
 #' @examples
 #' listEquals = function(a, b) { is.null(unlist(a)) && is.null(unlist(b)) ||
@@ -102,7 +102,7 @@ AhoCorasickSearchList <- function(keywords, textList, alphabet = "ascii", groupB
 #' @seealso
 #' \itemize{
 #' \item \href{https://www.codeproject.com/Articles/12383/Aho-Corasick-string-matching-in-C}{Aho-Corasick string matching in C#} for the article this package is based on
-#' \item \code{\link[Biostrings]{matchPDict}} for a more memory efficient, but DNA-only, implementation of the algorithm
+#' \item \code{Biostrings matchPDict} for a more memory efficient, but DNA-only, implementation of the algorithm
 #' }
 #' @examples
 #' listEquals = function(a, b) { is.null(unlist(a)) && is.null(unlist(b)) ||

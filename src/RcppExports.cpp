@@ -5,6 +5,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // AhoCorasickSearchList
 Rcpp::List AhoCorasickSearchList(Rcpp::StringVector keywords, Rcpp::List textList, std::string alphabet, bool groupByKeyword, int iterationFeedback);
 RcppExport SEXP _AhoCorasickTrie_AhoCorasickSearchList(SEXP keywordsSEXP, SEXP textListSEXP, SEXP alphabetSEXP, SEXP groupByKeywordSEXP, SEXP iterationFeedbackSEXP) {

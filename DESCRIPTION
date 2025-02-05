@@ -26,5 +26,4 @@ Imports:
     Rcpp (>= 0.12.5)
 LinkingTo: Rcpp
 Suggests: microbenchmark, testthat
-SystemRequirements: C++14
-RoxygenNote: 7.1.1
+RoxygenNote: 7.3.2
