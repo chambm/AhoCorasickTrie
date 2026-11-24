@@ -1,4 +1,7 @@
 # AhoCorasickTrie
+[![R-CMD-check](https://github.com/chambm/AhoCorasickTrie/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/chambm/AhoCorasickTrie/actions/workflows/R-CMD-check.yaml)
+[![CRAN status](https://www.r-pkg.org/badges/version/AhoCorasickTrie)](https://CRAN.R-project.org/package=AhoCorasickTrie)
+
 An R package that implements fast searching for multiple keywords in multiple texts.
 
 Aho-Corasick is an optimal algorithm for finding many keywords in a text. It can locate all matches in a text in O(N+M) time; i.e., the time needed scales linearly with the number of keywords (N) and the size of the text (M). Compare this to the naive approach which takes O(N*M) time to loop through each pattern and scan for it in the text.

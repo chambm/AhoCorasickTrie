@@ -1,0 +1,210 @@
+# Manually triggered CRAN release. See RELEASING.md.
+#
+#   gh workflow run cran-release.yaml                 # dry run: all checks + build tarball
+#   gh workflow run cran-release.yaml -f submit=true  # same, then submit to CRAN
+#
+# After a real submission CRAN emails the maintainer (from DESCRIPTION) a link
+# that must be clicked to confirm it.
+name: CRAN release
+
+on:
+  workflow_dispatch:
+    inputs:
+      submit:
+        description: Submit to CRAN (unchecked = dry run that only checks and builds)
+        type: boolean
+        default: false
+
+concurrency:
+  group: cran-release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    name: Preflight
+    runs-on: ubuntu-latest
+    outputs:
+      package: ${{ steps.meta.outputs.package }}
+      version: ${{ steps.meta.outputs.version }}
+    steps:
+      - name: Only submit from master
+        if: inputs.submit && github.ref != 'refs/heads/master'
+        run: |
+          echo "::error::Submissions must run from master (this run is on ${GITHUB_REF})."
+          exit 1
+
+      - uses: actions/checkout@v5
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - name: Check version, NEWS and cran-comments
+        id: meta
+        shell: Rscript {0}
+        run: |
+          desc <- read.dcf("DESCRIPTION")
+          pkg <- unname(desc[1, "Package"])
+          ver <- unname(desc[1, "Version"])
+          cran <- available.packages(repos = "https://cloud.r-project.org")
+          cran_ver <- if (pkg %in% rownames(cran)) cran[pkg, "Version"] else NA
+          message(sprintf("%s: this commit %s, CRAN %s", pkg, ver, cran_ver))
+
+          problems <- character()
+          if (!is.na(cran_ver) && package_version(ver) <= package_version(cran_ver))
+            problems <- c(problems, sprintf(
+              "DESCRIPTION Version (%s) must be greater than the version on CRAN (%s).", ver, cran_ver))
+          if (!file.exists("cran-comments.md"))
+            problems <- c(problems, "cran-comments.md is missing.")
+          heading <- sprintf("# %s %s", pkg, ver)
+          if (!file.exists("NEWS.md") || !(heading %in% trimws(readLines("NEWS.md"))))
+            problems <- c(problems, sprintf("NEWS.md has no '%s' heading.", heading))
+
+          if (length(problems)) {
+            cat(sprintf("::error::%s\n", problems), sep = "")
+            quit(status = 1)
+          }
+          cat(sprintf("package=%s\nversion=%s\n", pkg, ver),
+              file = Sys.getenv("GITHUB_OUTPUT"), append = TRUE)
+
+  check:
+    needs: preflight
+    uses: ./.github/workflows/R-CMD-check.yaml
+
+  revdeps:
+    name: Reverse dependency check
+    needs: preflight
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      PKG: ${{ needs.preflight.outputs.package }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
+
+      - name: Check reverse dependencies against this version
+        shell: Rscript {0}
+        run: |
+          pkg <- Sys.getenv("PKG")
+          repos <- "https://cloud.r-project.org"
+          revdeps <- tools::package_dependencies(
+            pkg, db = available.packages(repos = repos), reverse = TRUE,
+            which = c("Depends", "Imports", "LinkingTo", "Suggests"))[[1]]
+          message("Reverse dependencies: ", if (length(revdeps)) paste(revdeps, collapse = ", ") else "none")
+          if (!length(revdeps)) quit(status = 0)
+
+          # Install the revdeps with everything their checks need, then put
+          # this version of the package over the CRAN copy they pulled in.
+          pak::pkg_install(revdeps, dependencies = TRUE)
+          stopifnot(system2("R", c("CMD", "INSTALL", ".")) == 0)
+
+          dir.create("revdep")
+          failed <- character()
+          for (p in revdeps) {
+            tarball <- download.packages(p, "revdep", repos = repos)[, 2]
+            res <- rcmdcheck::rcmdcheck(tarball, args = "--no-manual", error_on = "never",
+                                        check_dir = file.path("revdep", p))
+            if (length(res$errors) || length(res$warnings)) failed <- c(failed, p)
+          }
+          if (length(failed)) {
+            cat(sprintf("::error::R CMD check of reverse dependency %s has errors or warnings\n", failed), sep = "")
+            quit(status = 1)
+          }
+
+      - name: Upload revdep check results
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: revdep-check-results
+          path: revdep
+
+  release:
+    name: Build${{ inputs.submit && ' and submit' || '' }}
+    needs: [preflight, check, revdeps]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      PKG: ${{ needs.preflight.outputs.package }}
+      VERSION: ${{ needs.preflight.outputs.version }}
+      TARBALL: ${{ needs.preflight.outputs.package }}_${{ needs.preflight.outputs.version }}.tar.gz
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck, any::devtools
+          needs: check
+
+      - name: Build source tarball
+        run: |
+          R CMD build .
+          test -f "$TARBALL"
+
+      - name: Check the exact tarball being submitted
+        shell: Rscript {0}
+        run: |
+          rcmdcheck::rcmdcheck(Sys.getenv("TARBALL"), args = c("--as-cran", "--no-manual"),
+                               error_on = "warning", check_dir = "check")
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.PKG }}-${{ env.VERSION }}-source
+          path: ${{ env.TARBALL }}
+
+      # Same two-step form POST that devtools::submit_cran() does, minus its
+      # interactive prompts. Uses cran-comments.md and the DESCRIPTION maintainer.
+      - name: Submit to CRAN
+        if: inputs.submit
+        shell: Rscript {0}
+        run: devtools:::upload_cran(".", Sys.getenv("TARBALL"))
+
+      # A draft release doesn't create the git tag. Publish it once CRAN accepts.
+      - name: Create draft GitHub release
+        if: inputs.submit
+        run: |
+          TAG="v${VERSION}"
+          awk -v h="# ${PKG} ${VERSION}" '$0==h {p=1; next} /^# / {if (p) exit} p' NEWS.md > notes.md
+          printf '\n---\nSubmitted to CRAN from %s by run %s/%s/actions/runs/%s.\n' \
+            "$GITHUB_SHA" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" >> notes.md
+          if [ "$(gh release view "$TAG" --json isDraft -q .isDraft 2>/dev/null)" = "true" ]; then
+            gh release upload "$TAG" "$TARBALL" --clobber
+            gh release edit "$TAG" --target "$GITHUB_SHA" --notes-file notes.md
+          elif gh release view "$TAG" > /dev/null 2>&1; then
+            echo "::warning::Release $TAG is already published; leaving it alone."
+          else
+            gh release create "$TAG" "$TARBALL" --draft --target "$GITHUB_SHA" \
+              --title "${PKG} ${VERSION}" --notes-file notes.md
+          fi
+
+      - name: Summary
+        run: |
+          if [ "${{ inputs.submit }}" = "true" ]; then
+            echo "### Submitted ${TARBALL} to CRAN" >> "$GITHUB_STEP_SUMMARY"
+            echo "Next: click the confirmation link CRAN emailed to the maintainer. Once CRAN accepts it, publish the draft release v${VERSION}." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### Dry run passed for ${TARBALL}" >> "$GITHUB_STEP_SUMMARY"
+            echo "Re-run with submit=true to send it to CRAN." >> "$GITHUB_STEP_SUMMARY"
+          fi
