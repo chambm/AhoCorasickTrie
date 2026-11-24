@@ -48,3 +48,16 @@ test_that("grouping by keyword without text names", {
   expect_equal(peptideSearch$KEKE, list(29, 31, 33))
 })
 
+
+test_that("keywords with characters outside the alphabet give an error, not a crash", {
+  for (keyword in c("peptidek", "AC[+57.0]K", "PEP.TIDEK", "PEP(TIDEK", "PEPTIDE[")) {
+    expect_error(AhoCorasickSearch(c("PEPTIDE", keyword), "MKPEPTIDEKAAA", alphabet = "aminoacid"),
+                 "is not in the trie's alphabet", info = keyword)
+  }
+})
+
+test_that("a text character just past the alphabet gives an error", {
+  # '[' translates to index 26, one past the 26-letter aminoacid alphabet
+  expect_error(AhoCorasickSearch("PEPTIDE", "MK[PEPTIDEK", alphabet = "aminoacid"),
+               "is not in the trie's alphabet")
+})
