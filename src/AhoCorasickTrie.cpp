@@ -173,7 +173,7 @@ public:
       while (!transition)
       {
         int index = SymbolTranslator::translate(text[offset]);
-        if (index < 0 || index > SymbolTranslator::size())
+        if (index < 0 || index >= SymbolTranslator::size())
           throw std::out_of_range(std::string("[AhoCorasickTrie::find_first] character '") + text[offset] + "' is not in the trie's alphabet");
 
         transition = ptr->transitionHash[index];
@@ -210,7 +210,7 @@ public:
       while (!transition)
       {
         int index = SymbolTranslator::translate(text[offset]);
-        if (index < 0 || index > SymbolTranslator::size())
+        if (index < 0 || index >= SymbolTranslator::size())
           throw std::out_of_range(std::string("[AhoCorasickTrie::find_all] character '") + text[offset] + "' is not in the trie's alphabet (" + text.substr(std::max(int(offset), 5) - 5, 10) + ")");
 
         transition = ptr->transitionHash[index];
@@ -314,6 +314,13 @@ private:
 
   void _insert(const shared_keytype& keyword)
   {
+    // check before building: an out-of-alphabet character would index transitionHash out of bounds
+    for (char c : static_cast<const std::string&>(*keyword))
+    {
+      int index = SymbolTranslator::translate(c);
+      if (index < 0 || index >= SymbolTranslator::size())
+        throw std::out_of_range(std::string("[AhoCorasickTrie::insert] character '") + c + "' in keyword \"" + *keyword + "\" is not in the trie's alphabet");
+    }
     _isDirty = true;
     _keywords.insert(keyword);
   }
