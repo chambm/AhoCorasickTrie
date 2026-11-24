@@ -28,6 +28,7 @@ Authors:
 
 Other contributors:
 \itemize{
+  \item Witold Wolski [contributor]
   \item Vanderbilt University [copyright holder]
 }
 
