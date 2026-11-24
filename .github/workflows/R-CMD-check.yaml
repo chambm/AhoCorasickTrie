@@ -61,8 +61,12 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # Everything builds from source here; fs (via testthat) needs libuv headers.
+      # install.packages() only warns on failure, so verify the packages loaded.
       - name: Install dependencies
-        run: RDscript -e 'install.packages(c("Rcpp", "testthat"), repos = "https://cloud.r-project.org")'
+        run: |
+          apt-get update -qq && apt-get install -y -qq --no-install-recommends libuv1-dev
+          RDscript -e 'pkgs <- c("Rcpp", "testthat"); install.packages(pkgs, repos = "https://cloud.r-project.org"); for (p in pkgs) if (!requireNamespace(p, quietly = TRUE)) stop("failed to install ", p)'
 
       - name: Build and check
         run: |
@@ -79,7 +83,7 @@ jobs:
 
       - name: Upload check results
         if: failure()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: sanitizer-check-results
           path: AhoCorasickTrie.Rcheck
